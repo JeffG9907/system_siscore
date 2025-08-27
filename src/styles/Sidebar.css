@@ -1,0 +1,336 @@
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;600&display=swap');
+
+:root {
+  --sidebar-bg: #1a2948;
+  --sidebar-hover: #23376a;
+  --sidebar-active: #274886;
+  --sidebar-text: #f4f6fa;
+  --sidebar-icon: #8ea1c5;
+  --sidebar-divider: #2c3e6c;
+  --sidebar-width: 220px;
+  --sidebar-width-collapsed: 64px;
+}
+
+/* SIDEBAR GENERAL */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 16px rgba(35,55,106,0.10);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  transition: width 0.22s cubic-bezier(.6,-0.28,.74,.05), left 0.22s cubic-bezier(.6,-0.28,.74,.05);
+}
+
+/* COLAPSADO */
+.sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
+  min-width: var(--sidebar-width-collapsed);
+}
+
+/* HEADER */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--sidebar-divider);
+  min-height: 56px;
+  justify-content: space-between;
+}
+
+/* LOGO */
+.sidebar-logo img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  transition: width 0.22s, height 0.22s;
+}
+.sidebar.collapsed .sidebar-logo img {
+  width: 36px;
+  height: 36px;
+}
+
+/* TITULO Y SUBTITULO */
+.sidebar-title {
+  font-size: 2.8rem;
+  font-family: "Alfa Slab One", serif;
+  letter-spacing: 1px;
+  color: #ffffff;
+  margin-right: auto;
+}
+.sidebar-subtitle {
+  display: block;
+  width: 100%;
+  font-size: 0.55rem;
+  font-weight: 500;
+  color: #dbeafe;
+  margin-top: -0.4rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+  text-align: center;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  padding-left: 2px;
+  opacity: 0.85;
+}
+
+/* TOGGLE */
+.sidebar-toggle {
+  background: none;
+  border: none;
+  color: var(--sidebar-icon);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-left: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-toggle:hover {
+  color: #000000;
+}
+
+/* USERBOX */
+.sidebar-userbox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.7rem;
+  padding: 1rem 1.4rem 1rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-divider);
+}
+.sidebar-userinitial {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #32416d;
+  color: #dbeafe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-right: 0.4rem;
+  user-select: none;
+}
+.sidebar-username {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #dbeafe;
+  white-space: nowrap;
+}
+.sidebar-logout-inline {
+  background: none;
+  border: none;
+  color: #ff5757;
+  font-size: 1.38rem;
+  cursor: pointer;
+  transition: color 0.18s;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-logout-inline:hover {
+  color: #fff;
+}
+
+/* NAV */
+.sidebar-nav {
+  flex: 1;
+  padding: 1.5rem 0.5rem;
+  overflow-y: auto;
+}
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar-nav li {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.03rem;
+  transition: background 0.18s;
+  white-space: nowrap;
+}
+.sidebar.collapsed .sidebar-nav li {
+  justify-content: center;
+  padding: 0.7rem 0.2rem;
+}
+.sidebar-nav li:hover,
+.sidebar-nav li.active {
+  background: var(--sidebar-active);
+}
+.sidebar-nav li span {
+  color: var(--sidebar-text);
+}
+.sidebar-nav li svg {
+  color: var(--sidebar-icon);
+  font-size: 1.3rem;
+}
+
+/* OPCIONES ABAJO */
+.sidebar-bottom-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-top: 1px solid var(--sidebar-divider);
+  margin-top: auto;
+  gap: 0.2rem;
+}
+.sidebar-logout-bottom {
+  background: none;
+  border: none;
+  color: #ff5757;
+  font-size: 1.7rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-logout-bottom:hover {
+  color: #fff;
+}
+
+/* OVERLAY para móviles */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(35,55,106,0.18);
+  z-index: 99;
+  transition: opacity 0.22s;
+  opacity: 1;
+}
+.sidebar-overlay.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* RESPONSIVE SIDEBAR */
+@media (max-width: 850px) {
+  .sidebar {
+    position: fixed;
+    left: -100vw;
+    width: 70vw;
+    min-width: 170px;
+    max-width: 360px;
+    transition: left 0.22s cubic-bezier(.6,-0.28,.74,.05), width 0.22s cubic-bezier(.6,-0.28,.74,.05);
+    box-shadow: 0 0 16px rgba(35,55,106,0.16);
+  }
+  .sidebar.open {
+    left: 0;
+  }
+  .sidebar.collapsed {
+    width: 60px;
+    min-width: 60px;
+  }
+  .sidebar-logo img {
+    width: 32px;
+    height: 32px;
+  }
+  .sidebar-header {
+    min-height: 44px;
+    padding: 0.4rem;
+  }
+  .sidebar-title {
+    font-size: 2.05rem;
+  }
+  .sidebar-userbox {
+    padding: 0.6rem 0.7rem;
+  }
+  .sidebar-nav {
+    padding: 1rem 0.3rem;
+  }
+  .sidebar-nav li {
+    font-size: 0.93rem;
+    padding: 0.55rem 0.75rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    width: 96vw;
+    min-width: 50vw;
+    max-width: 96vw;
+    left: -100vw;
+  }
+  .sidebar.open {
+    left: 0;
+  }
+  .sidebar-header {
+    min-height: 38px;
+    padding: 0.2rem;
+  }
+  .sidebar-title {
+    font-size: 1.28rem;
+  }
+  .sidebar-userbox {
+    padding: 0.45rem 0.45rem;
+  }
+  .sidebar-nav {
+    padding: 0.5rem 0.2rem;
+  }
+  .sidebar-nav li {
+    font-size: 0.87rem;
+    padding: 0.45rem 0.5rem;
+    gap: 0.42rem;
+  }
+  .sidebar-logo img {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Mejorar experiencia en dispositivos pequeños */
+@media (max-width: 430px) {
+  .sidebar {
+    max-width: 100vw;
+    min-width: 100vw;
+    width: 100vw;
+    left: -100vw;
+  }
+  .sidebar.open {
+    left: 0;
+  }
+  .sidebar-header {
+    min-height: 34px;
+    padding: 0.08rem;
+  }
+  .sidebar-title {
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+  .sidebar-userbox {
+    padding: 0.25rem 0.25rem;
+  }
+  .sidebar-nav {
+    padding: 0.25rem 0.1rem;
+  }
+  .sidebar-nav li {
+    font-size: 0.75rem;
+    padding: 0.32rem 0.3rem;
+    gap: 0.22rem;
+  }
+}
+
+/* Scroll sidebar nav for overflow */
+.sidebar-nav {
+  overflow-y: auto;
+}

@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;600&display=swap');
+
+/* PALETA  CORPORATIVA */
+:root {
+  --primary-bg: #18202d;            /* Azul oscuro serio */
+  --panel-bg: #f4f6fa;              /* Gris claro profesional */
+  --panel-divider: #e3e5e8;
+  --primary-blue: #1a2948;          /* Azul para títulos */
+  --accent-blue: #23376a;           /* Azul para subtítulos y botón */
+  --input-bg: #eef0f4;
+  --input-border: #cfd6e6;
+  --input-focus: #23376a;
+  --button-bg: linear-gradient(120deg, #23376a 0%, #3b4f6b 100%);
+  --button-bg-hover: linear-gradient(120deg, #18213a 0%, #355187 100%);
+  --error-bg: #fae5e5;
+  --error-border: #c0392b;
+  --error-text: #a02525;
+}
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-bg);
+}
+
+.login-split-card {
+  background: var(--panel-bg);
+  border-radius: 20px;
+  box-shadow: 0 12px 32px 0 rgba(35, 55, 106, 0.13);
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.login-left {
+  background: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.7rem 2rem;
+  min-width: 260px;
+  max-width: 320px;
+  border-right: 1.5px solid var(--panel-divider);
+}
+
+.login-image {
+  width: 275px;
+  height: 275px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 24px rgba(35,55,106,0.13);
+  border: 5px solid #e3e5e8;
+  background: #fff;
+}
+
+.login-right {
+  padding: 2.7rem 2.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Formulario y títulos */
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  font-family: 'Nunito', sans-serif;
+}
+
+.login-title {
+  font-family: "Alfa Slab One", serif;
+  text-align: center;
+  color: var(--primary-blue);
+  font-size: 2.6rem;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 12px #18213a22;
+}
+
+.login-subtitle {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  text-align: center;
+  color: var(--accent-blue);
+  font-size: 1.07rem;
+  letter-spacing: 1px;
+  margin-bottom: 17px;
+}
+
+.login-form input {
+  border: 1.5px solid var(--input-border);
+  border-radius: 10px;
+  padding: 0.8rem 1.1rem;
+  font-size: 1.07rem;
+  outline: none;
+  background: var(--input-bg);
+  font-family: 'Nunito', sans-serif;
+  color: #222;
+  transition: border-color 0.2s, background 0.2s;
+}
+.login-form input:focus {
+  border-color: var(--input-focus);
+  background: #fff;
+}
+
+.login-form button {
+  background: var(--button-bg);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 0.95rem;
+  font-size: 1.12rem;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  box-shadow: 0 2px 8px rgba(35,55,106,0.07);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.login-form button:hover:not(:disabled) {
+  background: var(--button-bg-hover);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 16px rgba(35,55,106,0.09);
+}
+.login-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mensaje de error */
+.error {
+  background: var(--error-bg);
+  border-left: 4px solid var(--error-border);
+  color: var(--error-text);
+  border-radius: 7px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Nunito', sans-serif;
+}
+.error::before {
+  content: "⚠️";
+  font-size: 1.1rem;
+  margin-right: 4px;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  .login-split-card {
+    flex-direction: column;
+    max-width: 95vw;
+  }
+  .login-left {
+    border-right: none;
+    border-bottom: 1.5px solid var(--panel-divider);
+    min-width: 100%;
+    max-width: none;
+    padding: 2rem 0.5rem;
+  }
+  .login-right {
+    padding: 1.5rem 1rem;
+  }
+}
