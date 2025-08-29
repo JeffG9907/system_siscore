@@ -79,7 +79,7 @@ export default function UsuarioPage() {
     if (!window.confirm("¿Seguro que desea eliminar este usuario?")) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:4000/api/users/${id}`, { method: "DELETE" });
+      const res = await fetch(`https://backend-apiemail.up.railway.app/api/users/${id}`, { method: "DELETE" });
       const json = await res.json();
       if (json.ok) {
         setMensaje("Usuario eliminado correctamente.");
