@@ -1,73 +1,63 @@
 import React, { useState, useEffect } from "react";
-import { FaEdit, FaTrash, FaTimes, FaSave } from "react-icons/fa";
-import "../styles/CortePage.css";
+import "../styles/IncidenciasPage.css";
+import { generarPDFIncidencia } from "../utils/generarReporteIncidencias";
+import { FaEdit, FaFilePdf, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+
+const NOVEDADES = [
+  "Usuario agresivo",
+  "Medidor manipulado por el usuario",
+  "Retiro del sello de corte",
+  "Medidor dentro del predio",
+  "Fuga de agua antes del corte",
+  "Medidor dañado antes del corte",
+  "Conexión ilegal",
+  "Otro"
+];
+
+const OPERADORES = [
+  "Cuadrilla Amarilla",
+  "Cuadrilla Azul",
+  "Cuadrilla Roja",
+  "Cuadrilla Blanca",
+];
 
 const initialForm = {
   cuenta: "",
   medidor: "",
   fecha: "",
-  herramienta: "amarilla",
-  localizacion: "",
-  imagen: null,
+  novedad: "",
+  operador: "",
+  observaciones: "",
+  imagen: null
 };
 
-const API_URL = "https://backend-apiemail.up.railway.app/api/cortes";
+const API_HOST = "https://backend-apiemail.up.railway.app";
 
-function getTodayISO() {
-  const now = new Date();
-  const utcMinus5 = new Date(now.getTime() - (now.getTimezoneOffset() + 300) * 60000);
-  return utcMinus5.toISOString().slice(0, 10);
-}
-
-const CortePage = () => {
-  const [form, setForm] = useState({ ...initialForm, fecha: getTodayISO() });
+const IncidenciaPage = () => {
+  const [form, setForm] = useState(initialForm);
   const [mensaje, setMensaje] = useState("");
-  const [cortes, setCortes] = useState([]);
+  const [incidencias, setIncidencias] = useState([]);
   const [busqueda, setBusqueda] = useState("");
-  const [fechaFiltro, setFechaFiltro] = useState("");
   const [loading, setLoading] = useState(false);
   const [editando, setEditando] = useState(null);
   const [editForm, setEditForm] = useState(initialForm);
   const [editImagen, setEditImagen] = useState(null);
 
-  // Fetch cortes (todo)
-  useEffect(() => { fetchCortes(); }, []);
+  useEffect(() => { fetchIncidencias(); }, []);
 
-  const fetchCortes = async () => {
+  const fetchIncidencias = async () => {
     setLoading(true);
     try {
-      let url = API_URL;
-      if (fechaFiltro) url += `?fecha=${fechaFiltro}`;
-      const res = await fetch(url);
+      const res = await fetch(`${API_HOST}/api/incidencias`);
       const data = await res.json();
-      setCortes(Array.isArray(data) ? data : []);
-    } catch { setCortes([]); }
+      setIncidencias(Array.isArray(data) ? data : data.incidencias || []);
+    } catch { setIncidencias([]); }
     setLoading(false);
   };
 
-  // Filtro por cuenta
-  const handleBuscarCuenta = async (e) => {
-    e.preventDefault();
-    if (!busqueda.trim()) { setCortes([]); return; }
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/cuenta/${busqueda.trim()}`);
-      const json = await res.json();
-      setCortes(Array.isArray(json) ? json : []);
-    } catch { setCortes([]); }
-    setLoading(false);
-  };
-
-  // Filtro por fecha
-  useEffect(() => {
-    if (!fechaFiltro) return;
-    fetchCortes();
-  }, [fechaFiltro]);
-
-  // Guardar (crear)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.cuenta || !form.medidor || !form.fecha || !form.herramienta) {
+    if (!form.cuenta || !form.medidor || !form.fecha || !form.novedad || !form.operador) {
       setMensaje("Todos los campos son obligatorios."); return;
     }
     setMensaje(""); setLoading(true);
@@ -76,48 +66,31 @@ const CortePage = () => {
       Object.keys(form).forEach(key => {
         if (form[key]) formData.append(key, form[key]);
       });
-      if (form.imagen) formData.append("imagen", form.imagen);
-      const res = await fetch(API_URL, {
+      const res = await fetch(`${API_HOST}/api/incidencias`, {
         method: "POST", body: formData
       });
       const json = await res.json();
       if (json.ok) {
-        setMensaje("Corte registrado correctamente.");
-        setForm({ ...initialForm, fecha: getTodayISO() });
-        fetchCortes();
-      } else setMensaje(json.error || "Error al registrar el corte.");
-    } catch { setMensaje("Error al registrar el corte."); }
+        setMensaje("Incidencia registrada correctamente.");
+        setForm(initialForm); fetchIncidencias();
+        generarPDFIncidencia({
+          ...form,
+          imagenUrl: json.imagenUrl || ""
+        }, `incidencia_${form.cuenta}_${form.fecha}.pdf`);
+      } else setMensaje(json.error || "Error al registrar la incidencia.");
+    } catch { setMensaje("Error al registrar la incidencia."); }
     setLoading(false);
   };
 
-  // Eliminar
-  const handleEliminar = async (id) => {
-    if (!window.confirm("¿Seguro que desea eliminar el corte?")) return;
-    setMensaje(""); setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      const json = await res.json();
-      if (json.ok) { setMensaje("Corte eliminado correctamente."); fetchCortes(); }
-      else setMensaje(json.error || "Error al eliminar corte.");
-    } catch { setMensaje("Error de red"); }
-    setLoading(false);
-  };
-
-  // Abrir modal edición
   const abrirModalEdicion = (item) => {
     setEditando(item);
-    setEditForm({
-      ...item,
-      fecha: item.fecha ? item.fecha.slice(0, 10) : "",
-      imagen: item.imagen || null,
-    });
+    setEditForm({ ...item, fecha: item.fecha ? item.fecha.slice(0, 10) : "" });
     setEditImagen(null);
   };
   const cerrarModal = () => {
     setEditando(null); setEditForm(initialForm); setEditImagen(null);
   };
 
-  // Editar
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setMensaje(""); setLoading(true);
@@ -125,15 +98,13 @@ const CortePage = () => {
       let res, json;
       if (editImagen) {
         const formData = new FormData();
-        Object.keys(editForm).forEach(key => {
-          if (key !== "imagen") formData.append(key, editForm[key]);
-        });
+        Object.keys(editForm).forEach(key => formData.append(key, editForm[key]));
         formData.append("imagen", editImagen);
-        res = await fetch(`${API_URL}/${editando.id_cuenta}`, {
+        res = await fetch(`${API_HOST}/api/incidencias/${editando.id_incidencia}`, {
           method: "PUT", body: formData
         });
       } else {
-        res = await fetch(`${API_URL}/${editando.id_cuenta}`, {
+        res = await fetch(`${API_HOST}/api/incidencias/${editando.id_incidencia}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editForm)
@@ -141,179 +112,204 @@ const CortePage = () => {
       }
       json = await res.json();
       if (json.ok) {
-        setMensaje("Corte editado correctamente."); fetchCortes(); cerrarModal();
-      } else setMensaje(json.error || "Error al actualizar corte");
+        setMensaje("Incidencia editada correctamente."); fetchIncidencias(); cerrarModal();
+      } else setMensaje(json.error || "Error al actualizar incidencia");
     } catch { setMensaje("Error de red"); }
     setLoading(false);
   };
 
-  // Filtro visual local (opcional)
-  const cortesFiltrados = cortes.filter(i =>
+  const handleEliminar = async (id) => {
+    if (!window.confirm("¿Seguro que deseas eliminar esta incidencia?")) return;
+    setMensaje(""); setLoading(true);
+    try {
+      const res = await fetch(`${API_HOST}/api/incidencias/${id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.ok) { setMensaje("Incidencia eliminada correctamente."); fetchIncidencias(); }
+      else setMensaje(json.error || "Error al eliminar incidencia");
+    } catch { setMensaje("Error de red"); }
+    setLoading(false);
+  };
+
+  const handleGenerarPDF = (item) => {
+    const imagenUrl = item.imagenUrl || "";
+    generarPDFIncidencia({ ...item, imagenUrl }, `incidencia_${item.cuenta}_${item.fecha}.pdf`);
+  };
+
+  const incidenciasFiltradas = incidencias.filter(i =>
     busqueda.trim() === ""
       ? true
-      : String(i.id_cuenta).toLowerCase().includes(busqueda.toLowerCase()) ||
-        String(i.id_medidor).toLowerCase().includes(busqueda.toLowerCase())
+      : i.cuenta.toLowerCase().includes(busqueda.toLowerCase()) ||
+        i.medidor.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
-    <div className="corte-main-container">
-      <h1 className="corte-title">Registro de Cortes</h1>
-      <form className="corte-form" onSubmit={handleSubmit} encType="multipart/form-data">
+    <div className="incidencia-main-container">
+      <h1 className="incidencia-title">Registro de Novedades e Incidencias</h1>
+      <form className="incidencia-form" onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="corte-form-box">
-          <div className="corte-form-row">
-            <label>
+          <div className="incidencia-form-row">
+            <label className="incidencia-label-cuenta">
               Cuenta:
               <input
+                className="incidencia-entry-cuenta"
                 type="text"
                 value={form.cuenta}
                 onChange={e => setForm({ ...form, cuenta: e.target.value })}
-                required disabled={loading} autoComplete="off"
-                placeholder="Ej: 12345"
+                required autoComplete="off" disabled={loading}
+                placeholder="Ej: 1234"
               />
             </label>
-            <label>
+            <label className="incidencia-label-medidor">
               Medidor:
               <input
+                className="incidencia-entry-medidor"
                 type="text"
                 value={form.medidor}
                 onChange={e => setForm({ ...form, medidor: e.target.value })}
-                required disabled={loading} autoComplete="off"
+                required autoComplete="off" disabled={loading}
                 placeholder="Ej: MD98765"
               />
             </label>
-            <label>
+            <label className="incidencia-label-fecha">
               Fecha:
               <input
+                className="incidencia-entry-fecha"
                 type="date"
                 value={form.fecha}
                 onChange={e => setForm({ ...form, fecha: e.target.value })}
                 required disabled={loading}
+                placeholder="dd/mm/aaaa"
               />
             </label>
-            <label>
-              Herramienta:
+            <label className="incidencia-label-novedad">
+              Novedad:
               <select
-                value={form.herramienta}
-                onChange={e => setForm({ ...form, herramienta: e.target.value })}
+                className="incidencia-entry-novedad"
+                value={form.novedad}
+                onChange={e => setForm({ ...form, novedad: e.target.value })}
                 required disabled={loading}
               >
-                <option value="amarilla">Amarilla</option>
-                <option value="roja">Roja</option>
-                <option value="azul">Azul</option>
-                <option value="blanca">Blanca</option>
+                <option value="">Seleccione...</option>
+                {NOVEDADES.map(n => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
               </select>
             </label>
           </div>
-          <div className="corte-form-row">
-            <label>
-              Localización:
+          <div className="incidencia-form-row" style={{marginTop:"18px"}}>
+            <label className="incidencia-label-operador">
+              Operador:
+              <select
+                className="incidencia-entry-operador"
+                value={form.operador}
+                onChange={e => setForm({ ...form, operador: e.target.value })}
+                required disabled={loading}
+              >
+                <option value="">Seleccione...</option>
+                {OPERADORES.map(op => (
+                  <option key={op} value={op}>{op}</option>
+                ))}
+              </select>
+            </label>
+            <label className="incidencia-label-observaciones">
+              Observaciones:
               <input
+                className="incidencia-entry-observaciones"
                 type="text"
-                value={form.localizacion}
-                onChange={e => setForm({ ...form, localizacion: e.target.value })}
+                value={form.observaciones}
+                onChange={e => setForm({ ...form, observaciones: e.target.value })}
                 disabled={loading}
-                placeholder="https://maps.app.goo.gl/tTyWbAay9jPe7p36A"
+                maxLength={200}
+                placeholder="Observaciones adicionales"
               />
             </label>
-            <label>
+          </div>
+          <div className="incidencia-form-row" style={{marginTop:"18px"}}>
+            <label className="incidencia-label-imagen">
               Imagen:
               <input
+                className="incidencia-entry-imagen"
                 type="file"
                 accept="image/*"
                 onChange={e => setForm({ ...form, imagen: e.target.files[0] })}
                 disabled={loading}
               />
             </label>
-            <button type="submit" className="corte-btn" disabled={loading}>
+            <button type="submit" className="btn-incidencia-guardar" disabled={loading}>
               <FaSave /> Guardar
             </button>
           </div>
         </div>
       </form>
-      {mensaje && <div className="corte-mensaje">{mensaje}</div>}
+      {mensaje && <div className="incidencia-mensaje">{mensaje}</div>}
       {/* BUSQUEDA */}
-      <div className="corte-form-box">
-        <form style={{ display: 'flex', alignItems: 'center' }} onSubmit={handleBuscarCuenta} className="corte-filter">
-          <label style={{ marginRight: '1.5rem' }}>
-            <span>Buscar por cuenta o medidor:</span>
-            <input
-              type="text"
-              value={busqueda}
-              onChange={e => setBusqueda(e.target.value)}
-              placeholder="Número de cuenta o medidor"
-              autoComplete="off"
-              disabled={loading}
-            />
-          </label>
-          <button type="submit" className="corte-btn" disabled={loading}>
-            Buscar
-          </button>
-        </form>
-        <div className="corte-filter">
-          <label>
-            <span>Buscar por fecha:</span>
-            <input
-              type="date"
-              value={fechaFiltro}
-              onChange={e => setFechaFiltro(e.target.value)}
-              disabled={loading}
-            />
-          </label>
-        </div>
+      <div className="incidencia-reporte-btn">
+        <label className="incidencia-label-buscar">
+          <span>Buscar por cuenta o medidor:</span>
+          <input
+            type="text"
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            placeholder="Ej: 12345 o MD98765"
+           className="incidencia-entry-buscar"
+            autoComplete="off"
+          />
+        </label>
       </div>
-      <h2 className="corte-subtitle">
-        {`Cortes registrados | Total: ${cortesFiltrados.length}`}
+      <h2 className="incidencia-title" style={{ fontSize: "1.2rem", marginTop: 16 }}>
+        {`Incidencias registradas | Total: ${incidenciasFiltradas.length}`}
       </h2>
-      <div className="corte-table-wrapper">
-        <table className="corte-table">
+      <div className="incidencia-table-wrapper">
+        <table className="incidencia-table">
           <thead>
             <tr>
               <th>#</th>
               <th>Cuenta</th>
               <th>Medidor</th>
               <th>Fecha</th>
-              <th>Herramienta</th>
-              <th>Localización</th>
+              <th>Novedad</th>
+              <th>Operador</th>
+              <th>Observaciones</th>
               <th>Imagen</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {cortesFiltrados.map((item, idx) => (
-              <tr key={item.id_cuenta + "-" + idx}>
+            {incidenciasFiltradas.map((item, idx) => (
+              <tr key={item.id_incidencia}>
                 <td>{idx + 1}</td>
-                <td>{item.id_cuenta}</td>
-                <td>{item.id_medidor}</td>
+                <td>{item.cuenta}</td>
+                <td>{item.medidor}</td>
                 <td>{item.fecha ? item.fecha.slice(0, 10) : ""}</td>
-                <td>{item.herramienta || "-"}</td>
+                <td>{item.novedad}</td>
+                <td>{item.operador}</td>
+                <td>{item.observaciones || ""}</td>
                 <td>
-                  {item.localizacion ?
-                    <a href={item.localizacion} target="_blank" rel="noopener noreferrer">Ver mapa</a>
-                    : <span>-</span>
-                  }
-                </td>
-                <td>
-                  {item.imagen ?
-                    <a href={item.imagen} target="_blank" rel="noopener noreferrer">
-                      <img src={item.imagen} alt="Corte" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 4 }} />
+                  {item.imagenUrl ? (
+                    <a href={item.imagenUrl} target="_blank" rel="noopener noreferrer">
+                      <img src={item.imagenUrl} alt="Incidencia" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 4 }} />
                     </a>
-                    : <span>No imagen</span>
-                  }
+                  ) : (
+                    <span>No imagen</span>
+                  )}
                 </td>
                 <td>
-                  <button onClick={() => abrirModalEdicion(item)} className="corte-btn-edit" title="Editar">
+                  <button onClick={() => abrirModalEdicion(item)} className="btn-edit" title="Editar">
                     <FaEdit />
                   </button>
-                  <button onClick={() => handleEliminar(item.id_cuenta)} className="corte-btn-delete" title="Eliminar">
+                  <button onClick={() => handleGenerarPDF(item)} className="btn-pdf" title="PDF">
+                    <FaFilePdf />
+                  </button>
+                  <button onClick={() => handleEliminar(item.id_incidencia)} className="btn-delete" title="Eliminar">
                     <FaTrash />
                   </button>
                 </td>
               </tr>
             ))}
-            {cortesFiltrados.length === 0 && (
+            {incidenciasFiltradas.length === 0 && (
               <tr>
-                <td colSpan={8} className="corte-table-empty">
-                  No hay cortes encontrados.
+                <td colSpan={9} className="incidencia-table-empty">
+                  No hay incidencias encontradas con ese número de cuenta o medidor.
                 </td>
               </tr>
             )}
@@ -322,39 +318,49 @@ const CortePage = () => {
       </div>
       {/* MODAL EDICION */}
       {editando && (
-        <div className="corte-modal-backdrop">
-          <div className="corte-modal">
-            <h3>Editar Corte</h3>
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h3>Editar Incidencia</h3>
             <form onSubmit={handleEditSubmit} encType="multipart/form-data">
               <label>
                 Cuenta:
-                <input type="text" value={editForm.id_cuenta || ""}
-                  disabled required />
+                <input type="text" value={editForm.cuenta}
+                  onChange={e => setEditForm({ ...editForm, cuenta: e.target.value })} required />
               </label>
               <label>
                 Medidor:
-                <input type="text" value={editForm.id_medidor || ""}
-                  onChange={e => setEditForm({ ...editForm, id_medidor: e.target.value })} required />
+                <input type="text" value={editForm.medidor}
+                  onChange={e => setEditForm({ ...editForm, medidor: e.target.value })} required />
               </label>
               <label>
                 Fecha:
-                <input type="date" value={editForm.fecha || ""}
+                <input type="date" value={editForm.fecha}
                   onChange={e => setEditForm({ ...editForm, fecha: e.target.value })} required />
               </label>
               <label>
-                Herramienta:
-                <select value={editForm.herramienta || "amarilla"}
-                  onChange={e => setEditForm({ ...editForm, herramienta: e.target.value })} required>
-                  <option value="amarilla">Amarilla</option>
-                  <option value="roja">Roja</option>
-                  <option value="azul">Azul</option>
-                  <option value="blanca">Blanca</option>
+                Novedad:
+                <select value={editForm.novedad}
+                  onChange={e => setEditForm({ ...editForm, novedad: e.target.value })} required>
+                  <option value="">Seleccione...</option>
+                  {NOVEDADES.map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
                 </select>
               </label>
               <label>
-                Localización:
-                <input type="text" value={editForm.localizacion || ""}
-                  onChange={e => setEditForm({ ...editForm, localizacion: e.target.value })} />
+                Operador:
+                <select value={editForm.operador}
+                  onChange={e => setEditForm({ ...editForm, operador: e.target.value })} required>
+                  <option value="">Seleccione...</option>
+                  {OPERADORES.map(op => (
+                    <option key={op} value={op}>{op}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Observaciones:
+                <input type="text" value={editForm.observaciones}
+                  onChange={e => setEditForm({ ...editForm, observaciones: e.target.value })} />
               </label>
               <label>
                 Imagen:
@@ -363,11 +369,11 @@ const CortePage = () => {
                   accept="image/*"
                   onChange={e => setEditImagen(e.target.files[0])}
                 />
-                {editForm.imagen && !editImagen && (
+                {editando.imagenUrl && !editImagen && (
                   <div>
                     <span>Imagen actual:</span>
-                    <a href={editForm.imagen} target="_blank" rel="noopener noreferrer">
-                      <img src={editForm.imagen} alt="Corte" style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 4, marginLeft: 6 }} />
+                    <a href={editando.imagenUrl} target="_blank" rel="noopener noreferrer">
+                      <img src={editando.imagenUrl} alt="Incidencia" style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 4, marginLeft: 6 }} />
                     </a>
                   </div>
                 )}
@@ -391,4 +397,4 @@ const CortePage = () => {
   );
 };
 
-export default CortePage;
+export default IncidenciaPage;
