@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaEdit, FaTrash, FaTimes, FaSave } from "react-icons/fa";
 import "../styles/CortePage.css";
 
@@ -29,6 +29,9 @@ const CortePage = () => {
   const [editando, setEditando] = useState(null);
   const [editForm, setEditForm] = useState(initialForm);
   const [editImagen, setEditImagen] = useState(null);
+
+  // REF para limpiar el input file
+  const imagenInputRef = useRef(null);
 
   useEffect(() => { fetchCortes(); }, []);
 
@@ -92,6 +95,8 @@ const CortePage = () => {
       if (json.ok) {
         setMensaje("Corte registrado correctamente.");
         setForm({ ...initialForm, fecha: getTodayISO() });
+        // Limpiar el input file manualmente
+        if (imagenInputRef.current) imagenInputRef.current.value = "";
         fetchCortes();
       } else setMensaje(json.error || "Error al registrar el corte.");
     } catch { setMensaje("Error al registrar el corte."); }
@@ -247,6 +252,7 @@ const CortePage = () => {
                   onChange={e => setForm({ ...form, imagen: e.target.files[0] })}
                   disabled={loading}
                   className="corte-input-imagen"
+                  ref={imagenInputRef}
                 />
               </label>
               <button type="submit" className="corte-btn" disabled={loading}>
