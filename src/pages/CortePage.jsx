@@ -62,11 +62,21 @@ const CortePage = () => {
     fetchCortes();
   }, [fechaFiltro]);
 
-  // Guardar (crear)
+  // Validar existencia antes de guardar
+  const corteExiste = (cuenta) => {
+    return cortes.some(c => String(c.id_cuenta) === String(cuenta));
+  };
+
+  // Guardar (crear) con validación
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.id_cuenta || !form.id_medidor || !form.fecha || !form.herramienta) {
       setMensaje("Todos los campos son obligatorios."); return;
+    }
+    // Validar si ya existe un corte con esa cuenta
+    if (corteExiste(form.id_cuenta)) {
+      setMensaje(`Corte de cuenta ${form.id_cuenta} ya existe.`);
+      return;
     }
     setMensaje(""); setLoading(true);
     try {
