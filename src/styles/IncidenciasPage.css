@@ -11,12 +11,13 @@
 
 /* --- Títulos --- */
 .incidencia-title {
-  font-size: 1.7rem;
-  font-weight: 600;
-  color: #0158d2;
-  margin-bottom: 12px;
-  letter-spacing: 1px;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  color: #1251a5;
+  font-size: 2.4rem;
+  font-weight: 850;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 /* --- Formulario --- */

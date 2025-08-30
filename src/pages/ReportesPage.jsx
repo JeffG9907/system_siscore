@@ -97,7 +97,7 @@ const ReportesPage = () => {
                   if (e.target.value === "tendencia") setFilterType("mensual");
                   else setFilterType("diario");
                 }}
-                className="reportes-input-select"
+                className="reportes-input-select_f"
               >
                 {REPORT_TYPES.map(r => (
                   <option key={r.value} value={r.value}>{r.label}</option>
@@ -106,7 +106,6 @@ const ReportesPage = () => {
             </div>
             {(reportType === "cortes" || reportType === "reconexiones") && (
               <div className="reportes-label-group">
-                <label htmlFor="filtro-reporte">Filtro:</label>
                 <select
                   id="filtro-reporte"
                   value={filterType}
