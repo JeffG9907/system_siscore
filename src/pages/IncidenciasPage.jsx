@@ -43,6 +43,15 @@ const IncidenciaPage = () => {
   const [editForm, setEditForm] = useState(initialForm);
   const [editImagen, setEditImagen] = useState(null);
 
+  // Bloquea el scroll de fondo cuando la modal está abierta
+  useEffect(() => {
+    if (editando) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [editando]);
+
   useEffect(() => { fetchIncidencias(); }, []);
 
   const fetchIncidencias = async () => {

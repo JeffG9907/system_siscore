@@ -217,16 +217,17 @@
   color: #c00;
 }
 
-/* --- Modal edición --- */
+/* --- Modal edición (mejorado para bloquear scroll y centrar) --- */
 .modal-backdrop {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
-  background: rgba(36,82,153,0.13);
+  background: rgba(36,82,153,0.16);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
+  overflow: hidden;
 }
 
 .modal {
@@ -237,6 +238,8 @@
   min-width: 320px;
   max-width: 370px;
   width: 98vw;
+  max-height: 90vh;
+  overflow-y: auto;
   position: relative;
   animation: modalFadeIn 0.25s;
 }
