@@ -19,6 +19,21 @@ async function getImageBase64(url) {
 }
 
 /**
+ * Convierte una fecha "YYYY-MM-DD" o "YYYY-MM-DDTHH:mm:ss.sssZ" a "DD de mes de YYYY"
+ */
+function fechaFormateada(fechaStr) {
+  if (!fechaStr) return "";
+  // Si viene con hora (ISO), tomar solo la fecha
+  const soloFecha = fechaStr.split("T")[0];
+  const [year, month, day] = soloFecha.split("-");
+  const meses = [
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+  ];
+  return `${day} de ${meses[parseInt(month, 10) - 1]} de ${year}`;
+}
+
+/**
  * Genera un PDF profesional de novedad/incidencia con formato informe textual, logo, título centrado, campos con negrita, y espacio.
  * Si hay imagen de incidencia la muestra, si no, muestra texto.
  * @param {Object} incidencia
@@ -52,13 +67,11 @@ export async function generarPDFIncidencia(incidencia, nombreArchivo = "Incidenc
   const title = "REPORTE DE NOVEDADES E INCIDENCIAS";
   doc.text(title, pageWidth / 2, 50, { align: "center" });
 
-  // Fecha de reporte a la derecha del título
+  // Fecha de reporte a la derecha del título (siempre igual a la base de datos)
   doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(90, 90, 90);
-  const fechaReporte = incidencia.fecha
-    ? new Date(incidencia.fecha).toLocaleDateString("es-EC", { day: "2-digit", month: "long", year: "numeric" })
-    : "";
+  const fechaReporte = incidencia.fecha ? fechaFormateada(incidencia.fecha) : "";
   doc.text(`Fecha de reporte: ${fechaReporte}`, pageWidth - 15, 58, { align: "right" });
 
   // --- Sección 1: Datos generales ---
@@ -104,9 +117,7 @@ export async function generarPDFIncidencia(incidencia, nombreArchivo = "Incidenc
   doc.setFont("helvetica", "bold");
   doc.text("Fecha:", 20, y);
   doc.setFont("helvetica", "normal");
-  let fechaHora = incidencia.fecha
-    ? new Date(incidencia.fecha).toLocaleDateString("es-EC", { day: "2-digit", month: "2-digit", year: "numeric" })
-    : "-";
+  let fechaHora = incidencia.fecha ? fechaFormateada(incidencia.fecha) : "-";
   if (incidencia.hora) fechaHora += ` – ${incidencia.hora}`;
   doc.text(`${fechaHora}`, 50, y);
 
