@@ -27,6 +27,8 @@ const ALL_OPTIONS = [
   { key: "usuarios", label: "Usuarios", icon: <FaUsers /> },
 ];
 
+// Nuevo tipo de usuario: emapaped
+// Solo puede ver dashboard, reportes y novedades
 function getMenuOptionsByRole(role) {
   switch (role) {
     case "admin":
@@ -36,6 +38,10 @@ function getMenuOptionsByRole(role) {
     case "operador":
       return ALL_OPTIONS.filter((opt) =>
         ["dashboard", "cortes", "reconexiones", "novedades"].includes(opt.key)
+      );
+    case "emapaped":
+      return ALL_OPTIONS.filter((opt) =>
+        ["dashboard", "reportes", "novedades", "cortes", "reconexiones"].includes(opt.key)
       );
     default:
       return [];
@@ -82,12 +88,6 @@ const Sidebar = ({
   const handleOverlayClick = () => {
     if (isMobile && mobileOpen) setMobileOpen(false);
   };
-
-  // Botón hamburguesa para abrir sidebar en móvil
-  // Este botón lo puedes poner en tu header/topbar (ejemplo abajo)
-  // <button className="sidebar-mobile-toggle" onClick={() => setMobileOpen(true)}>
-  //   <FaBars />
-  // </button>
 
   return (
     <>

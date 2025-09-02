@@ -162,6 +162,7 @@ export default function UsuarioPage() {
             <option value="admin">Administrador</option>
             <option value="secretaria">Secretaria</option>
             <option value="operador">Operador</option>
+            <option value="emapaped">EMAPAPED</option>
           </select>
         </label>
         <label>
