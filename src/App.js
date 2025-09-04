@@ -78,7 +78,7 @@ function App() {
   };
 
   const showLogin = !user;
-  const isEmapaped = user?.role === "emapaped";
+  const isEpmapaped = user?.role === "epmapaped";
 
   return (
     <ThemeProvider theme={theme}>
@@ -101,12 +101,12 @@ function App() {
                   } />
                   <Route path="/cortes" element={
                     <ProtectedRoute user={user} pageKey="cortes" onLogout={handleLogout} collapsed={collapsed} setCollapsed={setCollapsed}>
-                      {isEmapaped ? <CorteViewPage /> : <CortePage />}
+                      {isEpmapaped ? <CorteViewPage /> : <CortePage />}
                     </ProtectedRoute>
                   } />
                   <Route path="/reconexiones" element={
                     <ProtectedRoute user={user} pageKey="reconexiones" onLogout={handleLogout} collapsed={collapsed} setCollapsed={setCollapsed}>
-                      {isEmapaped ? <ReconexionViewPage /> : <ReconexionPage />}
+                      {isEpmapaped ? <ReconexionViewPage /> : <ReconexionPage />}
                     </ProtectedRoute>
                   } />
                   <Route path="/reportes" element={
@@ -116,7 +116,7 @@ function App() {
                   } />
                   <Route path="/novedades" element={
                     <ProtectedRoute user={user} pageKey="novedades" onLogout={handleLogout} collapsed={collapsed} setCollapsed={setCollapsed}>
-                      {isEmapaped ? <IncidenciaViewPage /> : <IncidenciaPage />}
+                      {isEpmapaped ? <IncidenciaViewPage /> : <IncidenciaPage />}
                     </ProtectedRoute>
                   } />
                   <Route path="/usuarios" element={

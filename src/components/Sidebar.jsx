@@ -27,8 +27,6 @@ const ALL_OPTIONS = [
   { key: "usuarios", label: "Usuarios", icon: <FaUsers /> },
 ];
 
-// Nuevo tipo de usuario: emapaped
-// Solo puede ver dashboard, reportes y novedades
 function getMenuOptionsByRole(role) {
   switch (role) {
     case "admin":
@@ -39,7 +37,7 @@ function getMenuOptionsByRole(role) {
       return ALL_OPTIONS.filter((opt) =>
         ["dashboard", "cortes", "reconexiones", "novedades"].includes(opt.key)
       );
-    case "emapaped":
+    case "epmapaped":
       return ALL_OPTIONS.filter((opt) =>
         ["dashboard", "reportes", "novedades", "cortes", "reconexiones"].includes(opt.key)
       );
