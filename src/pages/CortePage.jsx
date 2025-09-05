@@ -30,6 +30,9 @@ const CortePage = () => {
   const [editForm, setEditForm] = useState(initialForm);
   const [editImagen, setEditImagen] = useState(null);
 
+  // Nuevo: para manejo de confirmación de segundo corte
+  const [pendienteConfirmacion, setPendienteConfirmacion] = useState(false);
+
   // REF para limpiar el input file
   const imagenInputRef = useRef(null);
 
@@ -65,23 +68,14 @@ const CortePage = () => {
     fetchCortes();
   }, [fechaFiltro]);
 
-  // Validar existencia antes de guardar
-  const corteExiste = (cuenta) => {
-    return cortes.some(c => String(c.id_cuenta) === String(cuenta));
-  };
-
-  // Guardar (crear) con validación
-  const handleSubmit = async (e) => {
+  // Guardar (crear) con confirmación si ya existe corte en el mes
+  const handleSubmit = async (e, forzar = false) => {
     e.preventDefault();
     if (!form.id_cuenta || !form.id_medidor || !form.fecha || !form.herramienta) {
       setMensaje("Todos los campos son obligatorios."); return;
     }
-    // Validar si ya existe un corte con esa cuenta
-    if (corteExiste(form.id_cuenta)) {
-      setMensaje(`Corte de cuenta ${form.id_cuenta} ya existe.`);
-      return;
-    }
     setMensaje(""); setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append("cuenta", form.id_cuenta);
@@ -90,25 +84,37 @@ const CortePage = () => {
       formData.append("herramienta", form.herramienta);
       formData.append("localizacion", form.localizacion);
       if (form.imagen) formData.append("imagen", form.imagen);
+      if (forzar) formData.append("forzar", "1"); // Solo si el usuario confirma
+
       const res = await fetch(API_URL, { method: "POST", body: formData });
       const json = await res.json();
+
       if (json.ok) {
         setMensaje("Corte registrado correctamente.");
         setForm({ ...initialForm, fecha: getTodayISO() });
-        // Limpiar el input file manualmente
         if (imagenInputRef.current) imagenInputRef.current.value = "";
         fetchCortes();
-      } else setMensaje(json.error || "Error al registrar el corte.");
-    } catch { setMensaje("Error al registrar el corte."); }
+        setPendienteConfirmacion(false);
+      } else if (json.confirm) {
+        setMensaje(json.message || "Ya existe un corte en el mes para esta cuenta y medidor. ¿Desea registrar otro?");
+        setPendienteConfirmacion(true);
+      } else {
+        setMensaje(json.error || "Error al registrar el corte.");
+        setPendienteConfirmacion(false);
+      }
+    } catch {
+      setMensaje("Error al registrar el corte.");
+      setPendienteConfirmacion(false);
+    }
     setLoading(false);
   };
 
   // Eliminar
-  const handleEliminar = async (id) => {
+  const handleEliminar = async (id_cortes) => {
     if (!window.confirm("¿Seguro que desea eliminar el corte?")) return;
     setMensaje(""); setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/${id_cortes}`, { method: "DELETE" });
       const json = await res.json();
       if (json.ok) { setMensaje("Corte eliminado correctamente."); fetchCortes(); }
       else setMensaje(json.error || "Error al eliminar corte.");
@@ -126,6 +132,7 @@ const CortePage = () => {
       herramienta: item.herramienta,
       localizacion: item.localizacion || "",
       imagen: item.imagen || null,
+      id_cortes: item.id_cortes,
     });
     setEditImagen(null);
   };
@@ -146,11 +153,11 @@ const CortePage = () => {
         formData.append("herramienta", editForm.herramienta);
         formData.append("localizacion", editForm.localizacion);
         formData.append("imagen", editImagen);
-        res = await fetch(`${API_URL}/${editando.id_cuenta}`, {
+        res = await fetch(`${API_URL}/${editando.id_cortes}`, {
           method: "PUT", body: formData
         });
       } else {
-        res = await fetch(`${API_URL}/${editando.id_cuenta}`, {
+        res = await fetch(`${API_URL}/${editando.id_cortes}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -182,7 +189,7 @@ const CortePage = () => {
     <div className="corte-main-container">
       <div className="corte-card">
         <h1 className="corte-title">Registro de Cortes</h1>
-        <form className="corte-form" onSubmit={handleSubmit} encType="multipart/form-data">
+        <form className="corte-form" onSubmit={e => handleSubmit(e)} encType="multipart/form-data">
           <div className="corte-form-box">
             <div className="corte-form-row">
               <label>
@@ -255,13 +262,34 @@ const CortePage = () => {
                   ref={imagenInputRef}
                 />
               </label>
-              <button type="submit" className="corte-btn" disabled={loading}>
+              <button type="submit" className="corte-btn" disabled={loading || pendienteConfirmacion}>
                 <FaSave /> Guardar
               </button>
             </div>
           </div>
         </form>
         {mensaje && <div className="corte-mensaje">{mensaje}</div>}
+        {/* Botón de confirmación para agregar el segundo corte del mes */}
+        {pendienteConfirmacion && (
+          <div className="corte-confirm">
+            <button
+              className="corte-btn"
+              style={{ background: "#f6ac3e", marginTop: "10px" }}
+              disabled={loading}
+              onClick={e => handleSubmit(e, true)}
+            >
+              Sí, agregar segundo corte este mes
+            </button>
+            <button
+              className="corte-btn"
+              style={{ background: "#ccc", marginLeft: "10px" }}
+              disabled={loading}
+              onClick={() => { setPendienteConfirmacion(false); setMensaje(""); }}
+            >
+              No, cancelar
+            </button>
+          </div>
+        )}
         <div className="corte-form-box">
           <div className="corte-filter-row">
             <form style={{ display: 'flex', alignItems: 'center' }} onSubmit={handleBuscarCuenta} className="corte-filter">
@@ -313,7 +341,7 @@ const CortePage = () => {
             </thead>
             <tbody>
               {cortesFiltrados.map((item, idx) => (
-                <tr key={item.id_cuenta + "-" + idx}>
+                <tr key={item.id_cortes}>
                   <td>{idx + 1}</td>
                   <td>{item.id_cuenta}</td>
                   <td>{item.id_medidor}</td>
@@ -337,7 +365,7 @@ const CortePage = () => {
                     <button onClick={() => abrirModalEdicion(item)} className="corte-btn-edit" title="Editar">
                       <FaEdit />
                     </button>
-                    <button onClick={() => handleEliminar(item.id_cuenta)} className="corte-btn-delete" title="Eliminar">
+                    <button onClick={() => handleEliminar(item.id_cortes)} className="corte-btn-delete" title="Eliminar">
                       <FaTrash />
                     </button>
                   </td>
@@ -449,4 +477,4 @@ const CortePage = () => {
   );
 };
 
-export default CortePage;
+export default CortePage; 
