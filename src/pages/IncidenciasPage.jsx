@@ -11,6 +11,9 @@ const NOVEDADES = [
   "Fuga de agua antes del corte",
   "Medidor dañado antes del corte",
   "Conexión ilegal",
+  "Medidor en mal estado",
+  "Llave de paso no sirve",
+  "Accesorios de medidor en mal estado",
   "Otro"
 ];
 
@@ -222,14 +225,15 @@ const IncidenciaPage = () => {
             </label>
             <label className="incidencia-label-observaciones">
               Observaciones:
-              <input
+              <textarea
                 className="incidencia-entry-observaciones"
-                type="text"
                 value={form.observaciones}
                 onChange={e => setForm({ ...form, observaciones: e.target.value })}
                 disabled={loading}
-                maxLength={200}
+                maxLength={500}
+                rows={4}
                 placeholder="Observaciones adicionales"
+                style={{ resize: "vertical" }}
               />
             </label>
           </div>
@@ -260,7 +264,7 @@ const IncidenciaPage = () => {
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
             placeholder="Ej: 12345 o MD98765"
-           className="incidencia-entry-buscar"
+            className="incidencia-entry-buscar"
             autoComplete="off"
           />
         </label>
@@ -368,8 +372,13 @@ const IncidenciaPage = () => {
               </label>
               <label>
                 Observaciones:
-                <input type="text" value={editForm.observaciones}
-                  onChange={e => setEditForm({ ...editForm, observaciones: e.target.value })} />
+                <textarea
+                  value={editForm.observaciones}
+                  onChange={e => setEditForm({ ...editForm, observaciones: e.target.value })}
+                  maxLength={500}
+                  rows={4}
+                  style={{ resize: "vertical", width: "100%" }}
+                />
               </label>
               <label>
                 Imagen:
