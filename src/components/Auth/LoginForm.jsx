@@ -54,7 +54,7 @@ const LoginForm = ({ onLogin }) => {
         onSubmit={handleSubmit}
         autoComplete="off"
         aria-label="Formulario de inicio de sesión"
-        style={showLoader ? { filter: "blur(2px)", pointerEvents: "none" } : {}}
+        style={showLoader ? { pointerEvents: "none" } : {}}
       >
         <h1 className="login-title">S.I.S</h1>
         <h2 className="login-subtitle">SISTEMA INTEGRAL SISCORE</h2>

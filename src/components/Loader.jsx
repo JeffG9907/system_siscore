@@ -1,6 +1,8 @@
+import React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import loaderImage from '../assets/logo.svg';
+import '../styles/Loader.css';
 
 const Loader = ({ text = "Cargando Datos..." }) => (
   <Box className="loader-root">
@@ -12,7 +14,7 @@ const Loader = ({ text = "Cargando Datos..." }) => (
     <Typography
       variant="h6"
       color="primary"
-      sx={{ mt: 3, fontWeight: 'bold', letterSpacing: 2 }}
+      className="loader-text"
     >
       {text}
     </Typography>
